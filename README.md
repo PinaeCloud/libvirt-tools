@@ -12,9 +12,9 @@ For Example:
 	vm_create mysql ubuntu mysql-master 1 512 8 192.168.0.22 255.255.255.0 192.168.0.1 192.168.0.1,8.8.8.8 
 	
 ## vm_clean ##
-Destroy VM ,undefine VM's XML, delete VM's image file
+Destroy VM ,undefine VM, delete image file
 
-	vm_clean vm_name/all --with-images
+	vm_clean vm_name --with-images
 
 For Example:
 	

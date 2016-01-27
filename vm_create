@@ -3,7 +3,6 @@
 # (https://google-styleguide.googlecode.com/svn/trunk/shell.xml)
 # Author: Huiyugeng
 
-
 TEMPLATE_BASE=/opt/template
 VM_BASE=/opt/vm
 
@@ -30,7 +29,7 @@ VM_CFG_FILE=$VM_PATH/$VM_NAME.xml
 PKG_LIST=("qemu-img" "virsh" "virt-copy-in")
 
 for PKG in ${PKG_LIST[@]}; do
-    which $PKG
+    which $PKG > /dev/null
     if [ $? == 0 ]; then
         echo "$PKG already installed"
     else
@@ -80,17 +79,19 @@ else
     exit 1
 fi
 
-if [ -f $VM_CFG_FILE ] ; then
+if [ -f "$VM_CFG_FILE" ] ; then
     sed -i 's/<name>.*<\/name>/<name>'$VM_NAME'<\/name>/g' $VM_CFG_FILE
     sed -i 's/<memory unit="MiB">.*<\/memory>/<memory unit="MiB">'$MEM_SIZE'<\/memory>/g' $VM_CFG_FILE
     sed -i 's/<currentMemory unit="MiB">.*<\/currentMemory>/<currentMemory unit="MiB">'$MEM_SIZE'<\/currentMemory>/g' $VM_CFG_FILE
     sed -i 's/<vcpu>.*<\/vcpu>/<vcpu>'$VCPU'<\/vcpu>/g' $VM_CFG_FILE
-    sed -i 's/<source file=".*" \/>/<source file="'$VM_IMG_FILE'" \/>/g' $VM_CFG_FILE
+    sed -i 's/<source file=".*" \/>/<source file="'$(echo "$VM_IMG_FILE" | sed -e 's/\//\\\//g')'" \/>/g' $VM_CFG_FILE
 
-    if  [ -z $MAC_ADDRESS ] ; then
-        MAC_ADDRESS=$(echo $RANDOM | md5sum | sed 's/\(..\)/&:/g' | cut -c1-17)
+    if  [ -n "$MAC_ADDRESS" ] ; then
+        sed -i 's/<mac address=".*" \/>/<mac address="'$MAC_ADDRESS'" \/>/g' $VM_CFG_FILE
+    else
+        sed -i '/<mac address=".*" \/>/d' $VM_CFG_FILE
     fi
-    sed -i 's/<mac address=".*" \/>/<mac address="'$MAC_ADDRESS'" \/>/g' $VM_CFG_FILE
+    
 
 else
     log_failure_msg "can't find libvirt configurtion file $VM_CFG_FILE"
@@ -107,7 +108,7 @@ fi
 
 case $2 in
 ubuntu)
-    cp -R $VM_BASE/$OS_TYPE/etc $VM_PATH/etc
+    cp -R $TEMPLATE_BASE/$OS_TYPE/etc $VM_PATH/etc
     echo $HOST_NAME > $VM_PATH/etc/hostname
 
     INTERFACE_CFG=$VM_PATH/etc/network/interfaces
@@ -145,7 +146,7 @@ centos)
     OS_TYPE=$CENTOS
     ;;
 *)
-    echo "can't configure $VM_NAME($OS_TYPE )"
+    echo "can't configure $VM_NAME($OS_TYPE)"
     exit 0
     ;;
 esac
