@@ -2,22 +2,34 @@
 
 **_A set tools for libvirt_**
 
-## vm_create ##
+## create vm ##
 Create new virtual machine(ubuntu/centos/windows)
 
-	vm_create vm_name template host_name vcpu memory(MB) disk(GB) ip_address netmask gateway dns_server mac_address(optional)
+	./create_vm.sh vm_name template host_name vcpu memory(MB) disk(GB) ip_address netmask gateway dns_server mac_address(optional)
 
 For Example:
 
-	vm_create mysql ubuntu mysql-master 1 512 8 192.168.0.22 255.255.255.0 192.168.0.1 192.168.0.1,8.8.8.8 
+	./create_vm.sh mysql ubuntu mysql-master 1 512 8 192.168.0.22 255.255.255.0 192.168.0.1 192.168.0.1,8.8.8.8 
 	
-## vm_clean ##
+## clean vm ##
 Destroy VM ,undefine VM, delete image file
 
-	vm_clean vm_name --with-images
+	./clean_vm.sh vm_name --with-images
 
 For Example:
 	
-	vm_clean mysql --with-images
+	./clean_vm.sh mysql --with-images
 
+## pcistub.sh ##
+Hide or resume device
+
+	./pcistub.sh -h <pcidev> : Hide BDF number of device
+	./pcistub.sh -u <pcidev> : Resume BDF number of device
+	./pcistub.sh -d <driver> : Driver name
+
+For Example:
+	
+	lspci # show device 
+	./pcistub.sh -h 08:00
+	./pcistub.sh -u 08:00 -d e1000
 	
